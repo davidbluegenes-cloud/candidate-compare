@@ -29,7 +29,7 @@ const candidatePhotos = {
   'Ashley Moody':
     'https://commons.wikimedia.org/wiki/Special:Redirect/file/Official_Portrait_of_Senator_Ashley_Moody_(cropped).jpg',
   'Angela Nixon':
-    'https://www.myfloridahouse.gov/FileStores/Web/Imaging/Member/4766.jpg',
+    'https://angienixon.com/wp-content/uploads/2026/01/angie-nixon-headshot.jpg',
 }
 
 function CandidatePhoto({ candidate }) {
