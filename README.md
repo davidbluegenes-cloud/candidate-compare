@@ -136,7 +136,7 @@ Administrators can remove database records.
 The application is deployed using Netlify.
 
 Deployed application:
-DEPLOYED_APP_URL
+https://amazing-selkie-7721a5.netlify.app
 
 ## Demo Video
 
