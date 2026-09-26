@@ -1,283 +1,242 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabase'
 import './App.css'
 
-const candidates = {
-  moody: {
-    name: 'Ashley Moody',
-    party: 'Republican',
-    partyShort: 'R',
-    role: 'Incumbent U.S. Senator',
-    initials: 'AM',
-    finance: {
-      raised: '$11.27M',
-      cash: '$8.49M',
-      asOf: 'Reported through July 29, 2026',
-    },
-    priorities: [
-      'Economic prosperity and lower taxes',
-      'Law enforcement and public safety',
-      'Border security and national sovereignty',
-    ],
-  },
-  nixon: {
-    name: 'Angela Nixon',
-    party: 'Democratic',
-    partyShort: 'D',
-    role: 'Florida State Representative',
-    initials: 'AN',
-    finance: {
-      raised: '$974.8K',
-      cash: '$265.0K',
-      asOf: 'Reported through July 29, 2026',
-    },
-    priorities: [
-      'Expanded healthcare access',
-      'Worker and family economic support',
-      'Housing affordability and public investment',
-    ],
-  },
+function formatMoney(value) {
+  if (value === null || value === undefined) return 'Not available'
+  const number = Number(value)
+
+  if (number >= 1000000) {
+    return `$${(number / 1000000).toFixed(2)}M`
+  }
+
+  if (number >= 1000) {
+    return `$${(number / 1000).toFixed(1)}K`
+  }
+
+  return `$${number.toLocaleString()}`
 }
 
-const issues = [
-  {
-    id: 'economy',
-    title: 'Economy & Taxes',
-    left: {
-      summary:
-        'Campaign messaging emphasizes tax reductions, economic growth, deregulation, and policies intended to encourage private investment.',
-      proposal:
-        'Supports a lower-tax, lower-regulation economic approach and highlights recent federal tax reductions.',
-      record:
-        'Specific legislative votes and bill context will be added from official congressional records.',
-      context:
-        'Voting records should be shown with the major provisions of each bill rather than reduced to a simple “pro-tax” or “anti-tax” label.',
-      source: 'Ashley Moody campaign',
-      sourceUrl: 'https://ashleymoody.com/',
-    },
-    right: {
-      summary:
-        'Campaign messaging emphasizes affordability, worker support, public investment, and reducing household economic pressures.',
-      proposal:
-        'Detailed proposal summaries will be added from campaign materials and candidate responses.',
-      record:
-        'Relevant Florida legislative votes will be added from official state records.',
-      context:
-        'State legislative votes and federal campaign proposals are different kinds of evidence and will be labeled separately.',
-      source: 'Candidate sources — verification in progress',
-      sourceUrl: 'https://angienixon.com/',
-    },
-  },
-  {
-    id: 'healthcare',
-    title: 'Healthcare',
-    left: {
-      summary:
-        'Position summary will be based on campaign statements and federal legislative activity.',
-      proposal:
-        'Specific healthcare proposals are being verified from primary sources.',
-      record:
-        'Relevant U.S. Senate votes will be linked to the official congressional record.',
-      context:
-        'The app will distinguish votes on broad budget legislation from votes focused specifically on healthcare.',
-      source: 'Official-source research pending',
-      sourceUrl: 'https://www.senate.gov/',
-    },
-    right: {
-      summary:
-        'Nixon has publicly supported Medicare for All as a model for universal healthcare coverage.',
-      proposal:
-        'Supports coverage without premiums, deductibles, copays, or surprise medical bills.',
-      record:
-        'Relevant Florida legislative votes will be added separately from campaign proposals.',
-      context:
-        'A stated federal policy goal is not the same thing as a completed legislative action, so they appear in separate fields.',
-      source: 'Candidate campaign / voter-guide materials',
-      sourceUrl: 'https://angienixon.com/',
-    },
-  },
-  {
-    id: 'immigration',
-    title: 'Immigration',
-    left: {
-      summary:
-        'Campaign messaging emphasizes border security, immigration enforcement, and national sovereignty.',
-      proposal:
-        'Specific federal proposals will be summarized from candidate statements and official legislative sources.',
-      record:
-        'Relevant Senate votes will be added with bill numbers and contextual provisions.',
-      context:
-        'Votes on large immigration or appropriations bills will list other significant provisions when relevant.',
-      source: 'Ashley Moody campaign',
-      sourceUrl: 'https://ashleymoody.com/',
-    },
-    right: {
-      summary:
-        'Nixon has stated support for comprehensive immigration reform and a pathway to citizenship for undocumented residents.',
-      proposal:
-        'Also supports fair and efficient processing of asylum claims.',
-      record:
-        'Relevant state-level actions will be separated from federal campaign proposals.',
-      context:
-        'The summary reflects the candidate’s own stated position rather than an opposing party’s characterization.',
-      source: 'VOTE411 candidate response',
-      sourceUrl: 'https://www.vote411.org/',
-    },
-  },
-  {
-    id: 'abortion',
-    title: 'Abortion',
-    left: {
-      summary:
-        'Candidate position and legislative record are being verified from primary sources.',
-      proposal:
-        'Specific current campaign commitments will appear here once sourced.',
-      record:
-        'Relevant votes or official actions will be shown independently of campaign statements.',
-      context:
-        'The app will avoid converting complex legislation into a one-word ideological label.',
-      source: 'Primary-source research pending',
-      sourceUrl: 'https://ashleymoody.com/',
-    },
-    right: {
-      summary:
-        'Candidate position and legislative record are being verified from primary sources.',
-      proposal:
-        'Specific current campaign commitments will appear here once sourced.',
-      record:
-        'Relevant votes or official actions will be shown independently of campaign statements.',
-      context:
-        'The same evidence rules are applied to both candidates.',
-      source: 'Primary-source research pending',
-      sourceUrl: 'https://angienixon.com/',
-    },
-  },
-  {
-    id: 'guns',
-    title: 'Guns',
-    left: {
-      summary:
-        'Candidate statements and relevant legislative activity will be summarized here.',
-      proposal:
-        'Current policy commitments are being verified.',
-      record:
-        'Federal votes will link to official Senate or Congress.gov records.',
-      context:
-        'Voting records will include the legislation’s major provisions when necessary for context.',
-      source: 'Primary-source research pending',
-      sourceUrl: 'https://www.congress.gov/',
-    },
-    right: {
-      summary:
-        'Candidate statements and relevant legislative activity will be summarized here.',
-      proposal:
-        'Current policy commitments are being verified.',
-      record:
-        'State legislative activity will link to official Florida records.',
-      context:
-        'The presentation will use the same fields and level of detail for both candidates.',
-      source: 'Primary-source research pending',
-      sourceUrl: 'https://www.myfloridahouse.gov/',
-    },
-  },
-  {
-    id: 'energy',
-    title: 'Energy & Environment',
-    left: {
-      summary:
-        'Campaign messaging favors expanding domestic energy production while also addressing Florida-specific environmental concerns.',
-      proposal:
-        'Specific proposals will be added from campaign and legislative sources.',
-      record:
-        'Relevant federal actions will be documented with dates and source links.',
-      context:
-        'Energy production and Florida coastal drilling policy may involve different positions and will not be collapsed into one label.',
-      source: 'Candidate and congressional sources',
-      sourceUrl: 'https://ashleymoody.com/',
-    },
-    right: {
-      summary:
-        'Campaign materials emphasize renewable energy, grid resilience, climate policy, and consumer energy costs.',
-      proposal:
-        'Specific proposals will be summarized directly from campaign materials.',
-      record:
-        'Relevant state legislative actions will be added where available.',
-      context:
-        'Campaign promises and completed legislative actions remain separate categories.',
-      source: 'Candidate campaign',
-      sourceUrl: 'https://angienixon.com/',
-    },
-  },
-]
-
-function CandidateHeader({ candidate, side }) {
-  return (
-    <article className={`candidate-card ${side}`}>
-      <div className="candidate-avatar">{candidate.initials}</div>
-      <div>
-        <div className="party-line">
-          <span className={`party-dot ${side}`}></span>
-          {candidate.party}
-        </div>
-        <h2>{candidate.name}</h2>
-        <p className="candidate-role">{candidate.role}</p>
-      </div>
-    </article>
-  )
-}
-
-function IssueCard({ issue }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <section className={`issue-card ${open ? 'open' : ''}`}>
-      <button className="issue-heading" onClick={() => setOpen(!open)}>
-        <span>{issue.title}</span>
-        <span className="expand-symbol">{open ? '−' : '+'}</span>
-      </button>
-
-      <div className="issue-summary-grid">
-        <p>{issue.left.summary}</p>
-        <p>{issue.right.summary}</p>
-      </div>
-
-      {open && (
-        <div className="issue-details-grid">
-          {[issue.left, issue.right].map((data, index) => (
-            <div className="detail-column" key={index}>
-              <h4>Campaign proposal</h4>
-              <p>{data.proposal}</p>
-
-              <h4>Relevant record</h4>
-              <p>{data.record}</p>
-
-              <h4>Important context</h4>
-              <p>{data.context}</p>
-
-              <a
-                className="source-link"
-                href={data.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Source: {data.source} ↗
-              </a>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  )
+function initials(name) {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
 }
 
 function App() {
-  const [state, setState] = useState('Florida')
-  const [view, setView] = useState('overview')
+  const [page, setPage] = useState('compare')
+  const [candidates, setCandidates] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [session, setSession] = useState(null)
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginMessage, setLoginMessage] = useState('')
+
+  const emptyForm = {
+    candidate_id: '',
+    issue: '',
+    current_position: '',
+    campaign_proposal: '',
+    record_summary: '',
+    context_summary: '',
+    source_label: '',
+    source_url: '',
+  }
+
+  const [form, setForm] = useState(emptyForm)
+  const [editingId, setEditingId] = useState(null)
+
+  async function loadData() {
+    setLoading(true)
+    setError('')
+
+    const { data, error } = await supabase
+      .from('candidates')
+      .select(`
+        *,
+        positions (*),
+        finance (*)
+      `)
+      .order('id')
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setCandidates(data || [])
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadData()
+
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleLogin(event) {
+    event.preventDefault()
+    setLoginMessage('Signing in...')
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setLoginMessage(error.message)
+      return
+    }
+
+    setLoginMessage('')
+    setPassword('')
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    setEditingId(null)
+    setForm(emptyForm)
+  }
+
+  function startCreate() {
+    const firstFeatured = candidates.find((candidate) => candidate.featured)
+
+    setEditingId(null)
+    setForm({
+      ...emptyForm,
+      candidate_id: firstFeatured?.id || '',
+    })
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function startEdit(position) {
+    setEditingId(position.id)
+
+    setForm({
+      candidate_id: position.candidate_id,
+      issue: position.issue || '',
+      current_position: position.current_position || '',
+      campaign_proposal: position.campaign_proposal || '',
+      record_summary: position.record_summary || '',
+      context_summary: position.context_summary || '',
+      source_label: position.source_label || '',
+      source_url: position.source_url || '',
+    })
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function savePosition(event) {
+    event.preventDefault()
+    setError('')
+
+    if (!form.candidate_id || !form.issue.trim()) {
+      setError('Candidate and issue are required.')
+      return
+    }
+
+    const payload = {
+      candidate_id: Number(form.candidate_id),
+      issue: form.issue.trim(),
+      current_position: form.current_position.trim(),
+      campaign_proposal: form.campaign_proposal.trim(),
+      record_summary: form.record_summary.trim(),
+      context_summary: form.context_summary.trim(),
+      source_label: form.source_label.trim(),
+      source_url: form.source_url.trim() || null,
+      updated_at: new Date().toISOString(),
+    }
+
+    let result
+
+    if (editingId) {
+      result = await supabase
+        .from('positions')
+        .update(payload)
+        .eq('id', editingId)
+    } else {
+      result = await supabase.from('positions').insert(payload)
+    }
+
+    if (result.error) {
+      setError(result.error.message)
+      return
+    }
+
+    setEditingId(null)
+    setForm(emptyForm)
+    await loadData()
+  }
+
+  async function deletePosition(id) {
+    const confirmed = window.confirm(
+      'Delete this position from the database?'
+    )
+
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from('positions')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      setError(error.message)
+      return
+    }
+
+    await loadData()
+  }
+
+  const featured = candidates.filter((candidate) => candidate.featured)
+  const otherCandidates = candidates.filter((candidate) => !candidate.featured)
+
+  const left = featured[0]
+  const right = featured[1]
+
+  const issueNames = Array.from(
+    new Set(
+      featured.flatMap((candidate) =>
+        (candidate.positions || []).map((position) => position.issue)
+      )
+    )
+  )
+
+  function getPosition(candidate, issue) {
+    return candidate?.positions?.find(
+      (position) => position.issue === issue
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        Loading Candidate Compare...
+      </div>
+    )
+  }
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark">CC</div>
+
           <div>
             <strong>Candidate Compare</strong>
             <span>Evidence before spin</span>
@@ -286,242 +245,592 @@ function App() {
 
         <nav>
           <button
-            className={view === 'overview' ? 'nav-active' : ''}
-            onClick={() => setView('overview')}
+            className={page === 'compare' ? 'nav-active' : ''}
+            onClick={() => setPage('compare')}
           >
             Compare
           </button>
+
           <button
-            className={view === 'method' ? 'nav-active' : ''}
-            onClick={() => setView('method')}
+            className={page === 'method' ? 'nav-active' : ''}
+            onClick={() => setPage('method')}
           >
             How it works
+          </button>
+
+          <button
+            className={page === 'admin' ? 'nav-active' : ''}
+            onClick={() => setPage('admin')}
+          >
+            Admin
           </button>
         </nav>
       </header>
 
-      {view === 'overview' ? (
+      {error && <div className="global-error">{error}</div>}
+
+      {page === 'compare' && (
         <main>
           <section className="hero">
             <div className="hero-copy">
               <span className="eyebrow">2026 ELECTION GUIDE</span>
-              <h1>Know who's running.<br />Know where they stand.</h1>
+
+              <h1>
+                Know who's running.
+                <br />
+                Know where they stand.
+              </h1>
+
               <p>
-                Candidate positions, campaign promises, voting records,
-                financial data and original sources — organized in one
-                side-by-side view.
+                Candidate positions, campaign promises, public records,
+                campaign finance and original sources organized in a
+                simple side-by-side view.
               </p>
             </div>
 
             <div className="state-picker">
-              <label htmlFor="state">Choose your state</label>
-              <select
-                id="state"
-                value={state}
-                onChange={(event) => setState(event.target.value)}
-              >
+              <label>Choose your state</label>
+
+              <select defaultValue="Florida">
                 <option>Florida</option>
               </select>
+
               <span>Prototype currently available for Florida</span>
             </div>
           </section>
 
           <section className="race-heading">
             <div>
-              <span className="eyebrow">{state.toUpperCase()}</span>
+              <span className="eyebrow">FLORIDA</span>
               <h2>U.S. Senate — Special Election</h2>
-              <p>November 3, 2026</p>
+              <p>2026 prototype race</p>
             </div>
 
-            <div className="race-note">
-              Also on the ballot: <strong>Neil Gillespie</strong> — No Party
-              Affiliation
-            </div>
-          </section>
-
-          <section className="candidate-grid">
-            <CandidateHeader candidate={candidates.moody} side="republican" />
-            <div className="versus">VS</div>
-            <CandidateHeader candidate={candidates.nixon} side="democratic" />
-          </section>
-
-          <section className="comparison-section">
-            <div className="section-title">
-              <span className="eyebrow">AT A GLANCE</span>
-              <h2>Key priorities</h2>
-              <p>
-                Short summaries first. Expand individual issues for the
-                underlying evidence and context.
-              </p>
-            </div>
-
-            <div className="priority-grid">
-              <div className="priority-column">
-                {candidates.moody.priorities.map((priority) => (
-                  <div className="priority-item" key={priority}>
-                    <span>✓</span>
-                    {priority}
-                  </div>
+            {otherCandidates.length > 0 && (
+              <div className="race-note">
+                Also in database:{' '}
+                {otherCandidates.map((candidate, index) => (
+                  <span key={candidate.id}>
+                    {index > 0 && ', '}
+                    <strong>{candidate.name}</strong> — {candidate.party}
+                  </span>
                 ))}
               </div>
+            )}
+          </section>
 
-              <div className="priority-column">
-                {candidates.nixon.priorities.map((priority) => (
-                  <div className="priority-item" key={priority}>
-                    <span>✓</span>
-                    {priority}
+          {left && right ? (
+            <>
+              <section className="candidate-grid">
+                <article className="candidate-card">
+                  <div className="candidate-avatar">
+                    {initials(left.name)}
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
 
-          <section className="comparison-section">
-            <div className="section-title">
-              <span className="eyebrow">ISSUES</span>
-              <h2>Side-by-side positions</h2>
-              <p>Click any issue for proposals, record, context and sources.</p>
-            </div>
+                  <div>
+                    <div className="party-line">
+                      {left.party}
+                    </div>
 
-            <div className="comparison-labels">
-              <strong>{candidates.moody.name}</strong>
-              <strong>{candidates.nixon.name}</strong>
-            </div>
+                    <h2>{left.name}</h2>
+                    <p className="candidate-role">{left.role_title}</p>
+                  </div>
+                </article>
 
-            <div className="issues-list">
-              {issues.map((issue) => (
-                <IssueCard issue={issue} key={issue.id} />
-              ))}
-            </div>
-          </section>
+                <div className="versus">VS</div>
 
-          <section className="comparison-section">
-            <div className="section-title">
-              <span className="eyebrow">CAMPAIGN FINANCE</span>
-              <h2>Follow the money</h2>
-              <p>
-                Reported campaign receipts and cash on hand. Detailed donor
-                categories will be added from official FEC records.
-              </p>
-            </div>
+                <article className="candidate-card">
+                  <div className="candidate-avatar">
+                    {initials(right.name)}
+                  </div>
 
-            <div className="finance-grid">
-              <div className="finance-card">
-                <div className="finance-name">{candidates.moody.name}</div>
-                <div className="money">{candidates.moody.finance.raised}</div>
-                <span>Total receipts</span>
-                <hr />
-                <div className="finance-secondary">
-                  <strong>{candidates.moody.finance.cash}</strong>
-                  <span>Cash on hand</span>
+                  <div>
+                    <div className="party-line">
+                      {right.party}
+                    </div>
+
+                    <h2>{right.name}</h2>
+                    <p className="candidate-role">{right.role_title}</p>
+                  </div>
+                </article>
+              </section>
+
+              <section className="comparison-section">
+                <div className="section-title">
+                  <span className="eyebrow">ISSUES</span>
+                  <h2>Side-by-side positions</h2>
+
+                  <p>
+                    These records are being read live from the Supabase
+                    database.
+                  </p>
                 </div>
-                <small>{candidates.moody.finance.asOf}</small>
-              </div>
 
-              <div className="finance-card">
-                <div className="finance-name">{candidates.nixon.name}</div>
-                <div className="money">{candidates.nixon.finance.raised}</div>
-                <span>Total receipts</span>
-                <hr />
-                <div className="finance-secondary">
-                  <strong>{candidates.nixon.finance.cash}</strong>
-                  <span>Cash on hand</span>
+                <div className="comparison-labels">
+                  <strong>{left.name}</strong>
+                  <strong>{right.name}</strong>
                 </div>
-                <small>{candidates.nixon.finance.asOf}</small>
-              </div>
-            </div>
 
-            <div className="finance-footnote">
-              Future version: individual contributions · PAC/committee
-              contributions · self-funding · notable disclosed contributors ·
-              outside spending
+                <div className="issues-list">
+                  {issueNames.map((issue) => {
+                    const leftPosition = getPosition(left, issue)
+                    const rightPosition = getPosition(right, issue)
+
+                    return (
+                      <details className="issue-card" key={issue}>
+                        <summary className="issue-heading">
+                          <span>{issue}</span>
+                          <span>+</span>
+                        </summary>
+
+                        <div className="issue-summary-grid">
+                          <div className="detail-column">
+                            <h4>Current position</h4>
+                            <p>
+                              {leftPosition?.current_position ||
+                                'No verified summary entered yet.'}
+                            </p>
+
+                            <h4>Campaign proposal</h4>
+                            <p>
+                              {leftPosition?.campaign_proposal ||
+                                'No verified proposal entered yet.'}
+                            </p>
+
+                            <h4>Relevant record</h4>
+                            <p>
+                              {leftPosition?.record_summary ||
+                                'No record entered yet.'}
+                            </p>
+
+                            <h4>Important context</h4>
+                            <p>
+                              {leftPosition?.context_summary ||
+                                'No context entered yet.'}
+                            </p>
+
+                            {leftPosition?.source_url ? (
+                              <a
+                                className="source-link"
+                                href={leftPosition.source_url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Source: {leftPosition.source_label || 'Open source'} ↗
+                              </a>
+                            ) : (
+                              <span className="source-link">
+                                Source: {leftPosition?.source_label || 'Pending'}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="detail-column">
+                            <h4>Current position</h4>
+                            <p>
+                              {rightPosition?.current_position ||
+                                'No verified summary entered yet.'}
+                            </p>
+
+                            <h4>Campaign proposal</h4>
+                            <p>
+                              {rightPosition?.campaign_proposal ||
+                                'No verified proposal entered yet.'}
+                            </p>
+
+                            <h4>Relevant record</h4>
+                            <p>
+                              {rightPosition?.record_summary ||
+                                'No record entered yet.'}
+                            </p>
+
+                            <h4>Important context</h4>
+                            <p>
+                              {rightPosition?.context_summary ||
+                                'No context entered yet.'}
+                            </p>
+
+                            {rightPosition?.source_url ? (
+                              <a
+                                className="source-link"
+                                href={rightPosition.source_url}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Source: {rightPosition.source_label || 'Open source'} ↗
+                              </a>
+                            ) : (
+                              <span className="source-link">
+                                Source: {rightPosition?.source_label || 'Pending'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </details>
+                    )
+                  })}
+                </div>
+              </section>
+
+              <section className="comparison-section">
+                <div className="section-title">
+                  <span className="eyebrow">CAMPAIGN FINANCE</span>
+                  <h2>Follow the money</h2>
+
+                  <p>
+                    Finance data is stored separately from policy claims.
+                  </p>
+                </div>
+
+                <div className="finance-grid">
+                  {[left, right].map((candidate) => {
+                    const finance = candidate.finance?.[0]
+
+                    return (
+                      <div className="finance-card" key={candidate.id}>
+                        <div className="finance-name">
+                          {candidate.name}
+                        </div>
+
+                        <div className="money">
+                          {formatMoney(finance?.total_raised)}
+                        </div>
+
+                        <span>Total reported receipts</span>
+
+                        <hr />
+
+                        <div className="finance-secondary">
+                          <strong>
+                            {formatMoney(finance?.cash_on_hand)}
+                          </strong>
+
+                          <span>Cash on hand</span>
+                        </div>
+
+                        <small>
+                          {finance?.as_of_date
+                            ? `Data as of ${finance.as_of_date}`
+                            : 'Date unavailable'}
+                        </small>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            </>
+          ) : (
+            <div className="global-error">
+              Two featured candidates were not found in the database.
             </div>
-          </section>
+          )}
 
           <section className="evidence-box">
             <div className="evidence-icon">✓</div>
+
             <div>
               <h3>Evidence-first comparisons</h3>
+
               <p>
-                Candidate statements are summarized from identified sources.
-                Voting records and campaign-finance information are presented
-                separately from campaign promises. Complex bills should include
-                important additional provisions rather than being reduced to a
-                misleading one-word label.
+                Candidate statements, campaign promises, voting records,
+                bill context and campaign-finance information are kept
+                separate so users can inspect the evidence themselves.
               </p>
             </div>
           </section>
 
           <div className="prototype-warning">
             <strong>Academic prototype:</strong> Some policy fields are
-            intentionally marked as awaiting source verification. Candidate
+            intentionally marked as awaiting verification. Candidate
             Compare does not endorse candidates.
           </div>
         </main>
-      ) : (
+      )}
+
+      {page === 'method' && (
         <main className="method-page">
           <span className="eyebrow">OUR METHOD</span>
+
           <h1>Show the evidence. Let the voter decide.</h1>
 
           <div className="method-grid">
             <article>
               <span>01</span>
               <h3>What they say</h3>
+
               <p>
-                Current positions and campaign promises should come first from
-                the candidate's own campaign, statements, interviews and
-                debates.
+                Campaign material, public statements, interviews and
+                debates document stated positions.
               </p>
             </article>
 
             <article>
               <span>02</span>
               <h3>What they did</h3>
+
               <p>
-                Votes and official actions should come from Congress.gov,
-                Senate records, state legislatures and other primary government
-                records.
+                Voting records and official actions are stored separately
+                from campaign promises.
               </p>
             </article>
 
             <article>
               <span>03</span>
-              <h3>What funded the campaign</h3>
+              <h3>Where the money comes from</h3>
+
               <p>
-                Federal campaign-finance numbers should come from Federal
-                Election Commission filings and should distinguish direct
-                contributions from independent outside spending.
+                Campaign-finance information is presented separately from
+                policy positions.
               </p>
             </article>
 
             <article>
               <span>04</span>
               <h3>Context matters</h3>
+
               <p>
-                A vote on a large bill should include important lesser-known
-                provisions when those provisions materially affect how the vote
-                may be understood.
+                Important provisions of complex legislation can be shown
+                so a vote is not reduced to a misleading one-word label.
               </p>
             </article>
 
             <article>
               <span>05</span>
-              <h3>Same questions</h3>
+              <h3>Same structure</h3>
+
               <p>
-                Candidates in the same race receive the same issue categories,
-                fields and evidence standards.
+                Candidates are displayed using the same issue headings and
+                information fields.
               </p>
             </article>
 
             <article>
               <span>06</span>
               <h3>No candidate score</h3>
+
               <p>
-                The application organizes evidence rather than assigning a
-                political candidate a truth, quality or recommendation score.
+                The application organizes evidence rather than assigning
+                candidates a recommendation or political score.
               </p>
             </article>
           </div>
+        </main>
+      )}
+
+      {page === 'admin' && (
+        <main className="method-page">
+          <span className="eyebrow">DATABASE ADMINISTRATION</span>
+          <h1>Candidate Compare Admin</h1>
+
+          {!session ? (
+            <form className="admin-login" onSubmit={handleLogin}>
+              <h2>Administrator login</h2>
+
+              <label>Email</label>
+
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+
+              <label>Password</label>
+
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+
+              <button type="submit">Log in</button>
+
+              {loginMessage && <p>{loginMessage}</p>}
+            </form>
+          ) : (
+            <>
+              <div className="admin-toolbar">
+                <span>Logged in as {session.user.email}</span>
+
+                <div>
+                  <button onClick={startCreate}>
+                    New Position
+                  </button>
+
+                  <button onClick={handleLogout}>
+                    Log out
+                  </button>
+                </div>
+              </div>
+
+              <form className="admin-form" onSubmit={savePosition}>
+                <h2>
+                  {editingId
+                    ? 'Update database record'
+                    : 'Create database record'}
+                </h2>
+
+                <label>Candidate</label>
+
+                <select
+                  value={form.candidate_id}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      candidate_id: event.target.value,
+                    })
+                  }
+                  required
+                >
+                  <option value="">Choose candidate</option>
+
+                  {featured.map((candidate) => (
+                    <option
+                      key={candidate.id}
+                      value={candidate.id}
+                    >
+                      {candidate.name}
+                    </option>
+                  ))}
+                </select>
+
+                <label>Issue</label>
+
+                <input
+                  value={form.issue}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      issue: event.target.value,
+                    })
+                  }
+                  placeholder="Example: Education"
+                  required
+                />
+
+                <label>Current position</label>
+
+                <textarea
+                  value={form.current_position}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      current_position: event.target.value,
+                    })
+                  }
+                />
+
+                <label>Campaign proposal</label>
+
+                <textarea
+                  value={form.campaign_proposal}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      campaign_proposal: event.target.value,
+                    })
+                  }
+                />
+
+                <label>Relevant record</label>
+
+                <textarea
+                  value={form.record_summary}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      record_summary: event.target.value,
+                    })
+                  }
+                />
+
+                <label>Important context</label>
+
+                <textarea
+                  value={form.context_summary}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      context_summary: event.target.value,
+                    })
+                  }
+                />
+
+                <label>Source label</label>
+
+                <input
+                  value={form.source_label}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      source_label: event.target.value,
+                    })
+                  }
+                  placeholder="Example: Official campaign website"
+                />
+
+                <label>Source URL</label>
+
+                <input
+                  value={form.source_url}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      source_url: event.target.value,
+                    })
+                  }
+                  placeholder="https://..."
+                />
+
+                <button type="submit">
+                  {editingId ? 'Save Changes' : 'Create Position'}
+                </button>
+              </form>
+
+              <section className="admin-records">
+                <h2>Existing database records</h2>
+
+                {featured.map((candidate) => (
+                  <div key={candidate.id}>
+                    <h3>{candidate.name}</h3>
+
+                    {(candidate.positions || []).map((position) => (
+                      <div
+                        className="admin-record"
+                        key={position.id}
+                      >
+                        <div>
+                          <strong>{position.issue}</strong>
+
+                          <span>
+                            {position.current_position ||
+                              'No summary entered'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <button
+                            onClick={() => startEdit(position)}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              deletePosition(position.id)
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </section>
+            </>
+          )}
         </main>
       )}
 
