@@ -519,6 +519,70 @@ function App() {
                   </p>
                 </div>
 
+                {left?.finance && right?.finance && (() => {
+                  const leftFinance = Array.isArray(left.finance)
+                    ? left.finance[0]
+                    : left.finance
+
+                  const rightFinance = Array.isArray(right.finance)
+                    ? right.finance[0]
+                    : right.finance
+
+                  const leftRaised = Number(leftFinance?.total_raised || 0)
+                  const rightRaised = Number(rightFinance?.total_raised || 0)
+                  const combined = leftRaised + rightRaised
+
+                  const leftPercent = combined
+                    ? (leftRaised / combined) * 100
+                    : 50
+
+                  const rightPercent = combined
+                    ? (rightRaised / combined) * 100
+                    : 50
+
+                  return (
+                    <div className="fundraising-comparison">
+                      <div className="fundraising-comparison-header">
+                        <div className="fundraising-candidate republican-fund">
+                          <strong>{left.name}</strong>
+                          <span>{formatMoney(leftRaised)}</span>
+                        </div>
+
+                        <div className="fundraising-title">
+                          Total Campaign Funds Raised
+                        </div>
+
+                        <div className="fundraising-candidate democratic-fund">
+                          <strong>{right.name}</strong>
+                          <span>{formatMoney(rightRaised)}</span>
+                        </div>
+                      </div>
+
+                      <div
+                        className="fundraising-bar"
+                        aria-label={`Campaign funds raised: ${left.name} ${formatMoney(
+                          leftRaised
+                        )}, ${right.name} ${formatMoney(rightRaised)}`}
+                      >
+                        <div
+                          className="fundraising-bar-left"
+                          style={{ width: `${leftPercent}%` }}
+                        />
+
+                        <div
+                          className="fundraising-bar-right"
+                          style={{ width: `${rightPercent}%` }}
+                        />
+                      </div>
+
+                      <div className="fundraising-percentages">
+                        <span>{leftPercent.toFixed(1)}% of combined funds</span>
+                        <span>{rightPercent.toFixed(1)}% of combined funds</span>
+                      </div>
+                    </div>
+                  )
+                })()}
+
                 <div className="finance-grid">
                   {[left, right].map((candidate) => {
                     const finance = Array.isArray(candidate.finance)
