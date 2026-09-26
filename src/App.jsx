@@ -390,7 +390,7 @@ function App() {
 
               <section className="comparison-section">
                 <div className="section-title">
-                  <span className="eyebrow">ISSUES</span>
+                  <span className="eyebrow politics-heading">POLITICS AND CURRENT ISSUES</span>
 
                   <p>
                     Expand an issue to compare the candidates directly.

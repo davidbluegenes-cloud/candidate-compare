@@ -993,3 +993,39 @@ footer strong {
     font-size: 18px;
   }
 }
+
+/* ===== Political comparison readability refinement ===== */
+
+.politics-heading {
+  font-size: 15px;
+  letter-spacing: 0.11em;
+}
+
+.detail-column h4 {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.detail-column p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.detail-column .source-link {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .politics-heading {
+    font-size: 14px;
+  }
+
+  .detail-column h4 {
+    font-size: 13px;
+  }
+
+  .detail-column p {
+    font-size: 15px;
+  }
+}
