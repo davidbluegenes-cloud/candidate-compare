@@ -1168,3 +1168,78 @@ footer strong {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Funding connections ===== */
+
+.funding-connections {
+  margin-top: 22px;
+  border-top: 1px solid #e3e7ec;
+  padding-top: 16px;
+}
+
+.funding-connections summary {
+  cursor: pointer;
+  color: #253951;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.connection-list {
+  margin-top: 14px;
+}
+
+.connection-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #e8ecf0;
+}
+
+.connection-item:last-child {
+  border-bottom: 0;
+}
+
+.connection-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.connection-header strong {
+  color: #26394f;
+  font-size: 14px;
+}
+
+.connection-header span {
+  color: #7c8999;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.connection-amount {
+  margin-top: 5px;
+  color: #344a63;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.connection-item p,
+.connection-empty,
+.foreign-influence-note {
+  color: #68778a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.connection-item a {
+  color: #345d8c;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.foreign-influence-note {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f5f7f9;
+}

@@ -85,7 +85,8 @@ function App() {
       .select(`
         *,
         positions (*),
-        finance (*)
+        finance (*),
+        finance_connections (*)
       `)
       .order('id')
 
@@ -636,6 +637,63 @@ function App() {
                             </strong>
                           </span>
                         </div>
+
+                        <details className="funding-connections">
+                          <summary>Funding connections</summary>
+
+                          {(candidate.finance_connections || []).length > 0 ? (
+                            <div className="connection-list">
+                              {candidate.finance_connections.map((connection) => (
+                                <div
+                                  className="connection-item"
+                                  key={connection.id}
+                                >
+                                  <div className="connection-header">
+                                    <strong>{connection.entity_name}</strong>
+
+                                    <span>
+                                      {connection.connection_type
+                                        .replaceAll('_', ' ')}
+                                    </span>
+                                  </div>
+
+                                  {connection.amount !== null && (
+                                    <div className="connection-amount">
+                                      {formatMoney(connection.amount)}
+                                      {connection.stance
+                                        ? ` · ${connection.stance}`
+                                        : ''}
+                                    </div>
+                                  )}
+
+                                  <p>{connection.description}</p>
+
+                                  {connection.source_url && (
+                                    <a
+                                      href={connection.source_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      {connection.source_label || 'View source'} ↗
+                                    </a>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="connection-empty">
+                              No verified committee-network or outside-spending
+                              entries have been loaded for this candidate yet.
+                            </p>
+                          )}
+
+                          <div className="foreign-influence-note">
+                            <strong>Foreign-principal records:</strong>{' '}
+                            None loaded in this prototype. Foreign lobbying
+                            disclosures are treated separately from campaign
+                            contributions.
+                          </div>
+                        </details>
 
                         {finance?.source_url && (
                           <a
