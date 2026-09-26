@@ -520,7 +520,9 @@ function App() {
 
                 <div className="finance-grid">
                   {[left, right].map((candidate) => {
-                    const finance = candidate.finance?.[0]
+                    const finance = Array.isArray(candidate.finance)
+                      ? candidate.finance[0]
+                      : candidate.finance
                     const total = Number(finance?.total_raised || 0)
 
                     const percent = (value) => {
