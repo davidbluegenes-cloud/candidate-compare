@@ -521,9 +521,48 @@ function App() {
                 <div className="finance-grid">
                   {[left, right].map((candidate) => {
                     const finance = candidate.finance?.[0]
+                    const total = Number(finance?.total_raised || 0)
+
+                    const percent = (value) => {
+                      if (!total || value === null || value === undefined) {
+                        return '0%'
+                      }
+
+                      return `${((Number(value) / total) * 100).toFixed(1)}%`
+                    }
+
+                    const fundingRows = [
+                      {
+                        label: 'Individuals',
+                        value: finance?.individual_contributions,
+                      },
+                      {
+                        label: 'Other political committees',
+                        value: finance?.other_committee_contributions,
+                      },
+                      {
+                        label: 'Party committees',
+                        value: finance?.party_contributions,
+                      },
+                      {
+                        label: 'Authorized committee transfers',
+                        value: finance?.authorized_transfers,
+                      },
+                      {
+                        label: 'Candidate / self-funding',
+                        value: finance?.candidate_contributions,
+                      },
+                    ]
 
                     return (
-                      <div className="finance-card" key={candidate.id}>
+                      <div
+                        className={`finance-card ${
+                          candidate.party === 'Republican'
+                            ? 'finance-republican'
+                            : 'finance-democratic'
+                        }`}
+                        key={candidate.id}
+                      >
                         <div className="finance-name">
                           {candidate.name}
                         </div>
@@ -534,19 +573,82 @@ function App() {
 
                         <span>Total reported receipts</span>
 
-                        <hr />
+                        <div className="finance-summary-row">
+                          <div>
+                            <strong>
+                              {formatMoney(finance?.cash_on_hand)}
+                            </strong>
+                            <span>Cash on hand</span>
+                          </div>
 
-                        <div className="finance-secondary">
-                          <strong>
-                            {formatMoney(finance?.cash_on_hand)}
-                          </strong>
-
-                          <span>Cash on hand</span>
+                          <div>
+                            <strong>
+                              {formatMoney(finance?.total_spent)}
+                            </strong>
+                            <span>Total spent</span>
+                          </div>
                         </div>
 
-                        <small>
+                        <div className="funding-breakdown">
+                          <h4>Where the money came from</h4>
+
+                          {fundingRows.map((row) => (
+                            <div
+                              className="funding-row"
+                              key={row.label}
+                            >
+                              <div className="funding-row-top">
+                                <span>{row.label}</span>
+
+                                <strong>
+                                  {formatMoney(row.value)}
+                                </strong>
+                              </div>
+
+                              <div className="funding-bar">
+                                <div
+                                  className="funding-bar-fill"
+                                  style={{
+                                    width: percent(row.value),
+                                  }}
+                                />
+                              </div>
+
+                              <small>{percent(row.value)} of receipts</small>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="individual-detail">
+                          <span>
+                            Itemized individuals:{' '}
+                            <strong>
+                              {formatMoney(finance?.itemized_individual)}
+                            </strong>
+                          </span>
+
+                          <span>
+                            Unitemized individuals:{' '}
+                            <strong>
+                              {formatMoney(finance?.unitemized_individual)}
+                            </strong>
+                          </span>
+                        </div>
+
+                        {finance?.source_url && (
+                          <a
+                            className="finance-source"
+                            href={finance.source_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Source: {finance.source_label || 'FEC'} ↗
+                          </a>
+                        )}
+
+                        <small className="finance-date">
                           {finance?.as_of_date
-                            ? `Data as of ${finance.as_of_date}`
+                            ? `Data through ${finance.as_of_date}`
                             : 'Date unavailable'}
                         </small>
                       </div>

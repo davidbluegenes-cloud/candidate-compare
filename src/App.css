@@ -1029,3 +1029,142 @@ footer strong {
     font-size: 15px;
   }
 }
+
+/* ===== Campaign finance breakdown ===== */
+
+.finance-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.finance-republican {
+  border-top: 5px solid #b33b45;
+}
+
+.finance-democratic {
+  border-top: 5px solid #376fae;
+}
+
+.finance-summary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 24px 0;
+  padding: 18px 0;
+  border-top: 1px solid #e5e9ee;
+  border-bottom: 1px solid #e5e9ee;
+}
+
+.finance-summary-row strong {
+  display: block;
+  color: #243750;
+  font-size: 20px;
+}
+
+.finance-summary-row span {
+  display: block;
+  margin-top: 3px;
+  color: #7c899b;
+  font-size: 12px;
+}
+
+.funding-breakdown {
+  margin-top: 18px;
+}
+
+.funding-breakdown h4 {
+  margin: 0 0 17px;
+  color: #273a53;
+  font-size: 15px;
+}
+
+.funding-row {
+  margin-bottom: 16px;
+}
+
+.funding-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: baseline;
+  color: #59687c;
+  font-size: 13px;
+}
+
+.funding-row-top strong {
+  color: #293b53;
+  white-space: nowrap;
+}
+
+.funding-bar {
+  height: 7px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7ebf0;
+}
+
+.funding-bar-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: 999px;
+  background: #6f7f92;
+}
+
+.finance-republican .funding-bar-fill {
+  background: #b33b45;
+}
+
+.finance-democratic .funding-bar-fill {
+  background: #376fae;
+}
+
+.funding-row small {
+  display: block;
+  margin-top: 4px;
+  color: #96a0ae;
+  font-size: 11px;
+}
+
+.individual-detail {
+  margin-top: 22px;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background: #f5f7f9;
+}
+
+.individual-detail span {
+  display: block;
+  color: #68768a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.individual-detail strong {
+  color: #34465d;
+}
+
+.finance-source {
+  display: inline-block;
+  margin-top: 19px;
+  color: #345d8c;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.finance-source:hover {
+  text-decoration: underline;
+}
+
+.finance-date {
+  display: block;
+  margin-top: 8px;
+  color: #929dac;
+}
+
+@media (max-width: 760px) {
+  .finance-summary-row {
+    grid-template-columns: 1fr;
+  }
+}
