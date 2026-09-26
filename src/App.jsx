@@ -25,6 +25,32 @@ function initials(name) {
     .slice(0, 2)
 }
 
+const candidatePhotos = {
+  'Ashley Moody':
+    'https://commons.wikimedia.org/wiki/Special:Redirect/file/Official_Portrait_of_Senator_Ashley_Moody_(cropped).jpg',
+  'Angela Nixon':
+    'https://www.myfloridahouse.gov/FileStores/Web/Imaging/Member/4766.jpg',
+}
+
+function CandidatePhoto({ candidate }) {
+  return (
+    <div className="candidate-photo-wrap">
+      <div className="candidate-photo-fallback">
+        {initials(candidate.name)}
+      </div>
+
+      <img
+        className="candidate-photo"
+        src={candidatePhotos[candidate.name]}
+        alt={`${candidate.name} portrait`}
+        onError={(event) => {
+          event.currentTarget.style.display = 'none'
+        }}
+      />
+    </div>
+  )
+}
+
 function App() {
   const [page, setPage] = useState('compare')
   const [candidates, setCandidates] = useState([])
@@ -271,31 +297,40 @@ function App() {
 
       {page === 'compare' && (
         <main>
-          <section className="hero">
-            <div className="hero-copy">
+          <section className="hero hero-compact">
+            <div className="hero-copy hero-copy-wide">
               <span className="eyebrow">2026 ELECTION GUIDE</span>
 
-              <h1>
-                Know who's running.
-                <br />
-                Know where they stand.
-              </h1>
+              <div className="election-selectors">
+                <div className="selector-group">
+                  <label htmlFor="state-select">State</label>
+                  <select id="state-select" defaultValue="Florida">
+                    <option>Florida</option>
+                  </select>
+                </div>
+
+                <div className="selector-group">
+                  <label htmlFor="race-select">Race or ballot</label>
+                  <select id="race-select" defaultValue="U.S. Senate">
+                    <option>U.S. Senate</option>
+                    <option disabled>Governor — coming soon</option>
+                    <option disabled>U.S. House — coming soon</option>
+                    <option disabled>
+                      Statewide Ballot Measures — coming soon
+                    </option>
+                  </select>
+                </div>
+              </div>
 
               <p>
                 Candidate positions, campaign promises, public records,
                 campaign finance and original sources organized in a
-                simple side-by-side view.
+                concise side-by-side view.
               </p>
-            </div>
 
-            <div className="state-picker">
-              <label>Choose your state</label>
-
-              <select defaultValue="Florida">
-                <option>Florida</option>
-              </select>
-
-              <span>Prototype currently available for Florida</span>
+              <span className="prototype-state-note">
+                Prototype currently populated for Florida U.S. Senate.
+              </span>
             </div>
           </section>
 
@@ -322,13 +357,12 @@ function App() {
           {left && right ? (
             <>
               <section className="candidate-grid">
-                <article className="candidate-card">
-                  <div className="candidate-avatar">
-                    {initials(left.name)}
-                  </div>
+                <article className="candidate-card candidate-republican">
+                  <CandidatePhoto candidate={left} />
 
                   <div>
-                    <div className="party-line">
+                    <div className="party-line party-republican">
+                      <span className="party-color-dot"></span>
                       {left.party}
                     </div>
 
@@ -339,13 +373,12 @@ function App() {
 
                 <div className="versus">VS</div>
 
-                <article className="candidate-card">
-                  <div className="candidate-avatar">
-                    {initials(right.name)}
-                  </div>
+                <article className="candidate-card candidate-democratic">
+                  <CandidatePhoto candidate={right} />
 
                   <div>
-                    <div className="party-line">
+                    <div className="party-line party-democratic">
+                      <span className="party-color-dot"></span>
                       {right.party}
                     </div>
 
@@ -358,17 +391,20 @@ function App() {
               <section className="comparison-section">
                 <div className="section-title">
                   <span className="eyebrow">ISSUES</span>
-                  <h2>Side-by-side positions</h2>
 
                   <p>
-                    These records are being read live from the Supabase
-                    database.
+                    Expand an issue to compare the candidates directly.
                   </p>
                 </div>
 
                 <div className="comparison-labels">
-                  <strong>{left.name}</strong>
-                  <strong>{right.name}</strong>
+                  <strong className="comparison-name republican-heading">
+                    {left.name}
+                  </strong>
+
+                  <strong className="comparison-name democratic-heading">
+                    {right.name}
+                  </strong>
                 </div>
 
                 <div className="issues-list">
@@ -397,7 +433,7 @@ function App() {
                                 'No verified proposal entered yet.'}
                             </p>
 
-                            <h4>Relevant record</h4>
+                            <h4>Documented action / record</h4>
                             <p>
                               {leftPosition?.record_summary ||
                                 'No record entered yet.'}
@@ -438,7 +474,7 @@ function App() {
                                 'No verified proposal entered yet.'}
                             </p>
 
-                            <h4>Relevant record</h4>
+                            <h4>Documented action / record</h4>
                             <p>
                               {rightPosition?.record_summary ||
                                 'No record entered yet.'}
