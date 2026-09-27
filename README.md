@@ -51,11 +51,12 @@ The goal is to organize evidence clearly so users can evaluate candidates themse
 
 Supabase provides the PostgreSQL database and Data API.
 
-The current prototype uses three primary tables:
+The current prototype uses four primary tables:
 
 - candidates
 - positions
 - finance
+- finance_connections
 
 Row Level Security is enabled.
 
@@ -77,71 +78,41 @@ Existing issue records can be edited through the Admin interface.
 ### Delete
 Administrators can remove database records.
 
-## Technologies Used
+## Project Structure
 
-- React
-- Vite
-- JavaScript
-- CSS
-- Supabase
-- PostgreSQL
-- Supabase Authentication
-- Git
-- GitHub
-- Netlify
+The application uses a React and Vite frontend connected to Supabase for database access and authentication.
 
-## Database
+The frontend contains the user interface and application logic, while Supabase stores candidate, issue-position, campaign-finance, and funding-connection data.
 
-Supabase provides the PostgreSQL database and Data API.
-
-The current prototype uses three primary tables:
-
-- candidates
-- positions
-- finance
-
-Row Level Security is enabled.
-
-Public visitors can read candidate information, while database modification requires authenticated access.
-
-## CRUD Functionality
-
-The Admin section demonstrates all four CRUD operations.
-
-### Create
-Administrators can create a new candidate issue record.
-
-### Read
-Candidate and issue records are retrieved from Supabase and displayed by the React frontend.
-
-### Update
-Existing issue records can be edited through the Admin interface.
-
-### Delete
-Administrators can remove database records.
+Git and GitHub are used for version control, and Netlify hosts the deployed application.
 
 ## Local Setup
 
 1. Clone the repository.
-2. Run npm install.
-3. Create a .env.local file containing:
+2. Run `npm install`.
+3. Create a `.env.local` file containing:
 
-   VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
-   VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
+   `VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL`
 
-4. Start the development server with npm run dev.
+   `VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY`
+
+4. Start the development server with:
+
+   `npm run dev`
 
 ## Deployment
 
 The application is deployed using Netlify.
 
 Deployed application:
+
 https://amazing-selkie-7721a5.netlify.app
 
 ## Demo Video
 
-Demo video:
-DEMO_VIDEO_URL
+Watch the 3–5 minute project demo here:
+
+https://youtu.be/_I3UjUizqd0
 
 ## Academic Project
 
